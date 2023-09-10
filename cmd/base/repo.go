@@ -106,23 +106,8 @@ func (r *Repo) CopyTo(ctx context.Context, to string, ignores []string) error {
 		return err
 	}
 	fmt.Println("CopyTo called" + r.Path() + "    " + to)
-	// 检测 如果新目录中存在 PACKAGE_NAME，ARTIFACT_ID 等关键字，路径会被替换，导致生成的文件不在预期目录
-	//var groupIdNew string = "cn.star.gg"
-	//var artifactIdNew string = "star"
-	//var packageNameNew string = "cn.start.pp"
-	//var titleNew string = "土豆"
-
-	// 白名单文件不重写，直接拷贝
-
-	// 重写 groupid
-	// 重写 PackageName
-	// 重写 Artifact_id
-	// 重写 Artifact_id 首字母大写
-	// 重写 title
-
-	//return copyDir(r.Path(), to, []string{}, ignores)
-
 	if err := filepath.Walk(r.Path(), walk(r.Path(), to)); err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil

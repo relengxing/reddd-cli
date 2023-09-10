@@ -131,8 +131,18 @@ func walk(home string, to string) func(path string, info os.FileInfo, err error)
 				// rewrite file
 				content = reWriteFileContent(content)
 			}
+			//return file.getPath().replace(projectBaseDir, projectBaseDirNew) // 新目录
+			//.replace(PACKAGE_NAME.replaceAll("\\.", Matcher.quoteReplacement(separator)),
+			//	packageNameNew.replaceAll("\\.", Matcher.quoteReplacement(separator)))
+			//.replace(ARTIFACT_ID, artifactIdNew) //
+			//.replaceAll(StrUtil.upperFirst(ARTIFACT_ID), StrUtil.upperFirst(artifactIdNew));
 			newPath := strings.ReplaceAll(path, home, to)
-			//newPath = strings.ReplaceAll(path, config.PackageNameOld, config.PackageNameNew)
+			newPath = strings.ReplaceAll(newPath, strings.ReplaceAll(config.PackageNameOld, "\\.", string(filepath.Separator)), strings.ReplaceAll(config.PackageNameOld, "\\.", string(filepath.Separator)))
+			newPath = strings.ReplaceAll(newPath, config.ArtifactIdOld, config.ArtifactIdNew)
+			ArtifactIdOldUpper := strings.ToUpper(string(config.ArtifactIdOld[0])) + config.ArtifactIdOld[1:]
+			ArtifactIdNewUpper := strings.ToUpper(string(config.ArtifactIdNew[0])) + config.ArtifactIdNew[1:]
+			newPath = strings.ReplaceAll(newPath, ArtifactIdOldUpper, ArtifactIdNewUpper)
+
 			//fmt.Println("newPath %s , path %s", path, newPath)
 			err = writeFileTo(content, newPath, info)
 			if err != nil {
@@ -167,8 +177,9 @@ func reWriteFileContent(old []byte) []byte {
 func writeFileTo(content []byte, path string, srcinfo os.FileInfo) error {
 	err := os.MkdirAll(strings.Replace(path, srcinfo.Name(), "", -1), os.ModePerm)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
-	//fmt.Printf("path: %s  mode: %s", path, srcinfo.Mode())
+	fmt.Printf("path: %s  mode: %s \r\n", path, srcinfo.Mode())
 	return os.WriteFile(path, content, srcinfo.Mode())
 }

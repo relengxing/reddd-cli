@@ -5,10 +5,12 @@ go 1.20
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/fatih/color v1.15.0
+	github.com/go-enry/go-enry/v2 v2.8.4
 	github.com/spf13/cobra v1.7.0
 )
 
 require (
+	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

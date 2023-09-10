@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -104,7 +105,7 @@ func (r *Repo) CopyTo(ctx context.Context, to string, ignores []string) error {
 	if err := r.Clone(ctx); err != nil {
 		return err
 	}
-	fmt.Println("CopyTo called" + r.Path())
+	fmt.Println("CopyTo called" + r.Path() + "    " + to)
 	// 检测 如果新目录中存在 PACKAGE_NAME，ARTIFACT_ID 等关键字，路径会被替换，导致生成的文件不在预期目录
 	//var groupIdNew string = "cn.star.gg"
 	//var artifactIdNew string = "star"
@@ -119,13 +120,10 @@ func (r *Repo) CopyTo(ctx context.Context, to string, ignores []string) error {
 	// 重写 Artifact_id 首字母大写
 	// 重写 title
 
-	return copyDir(r.Path(), to, []string{}, ignores)
-	// 获取文件夹下所有文件
-	// 遍历所有文件，白名单直接复制
-	// 非白名单，重写文件内容，再生成文件
-	//        return content.replaceAll(GROUP_ID, groupIdNew)
-	//                .replaceAll(PACKAGE_NAME, packageNameNew)
-	//                .replaceAll(ARTIFACT_ID, artifactIdNew) // 必须放在最后替换，因为 ARTIFACT_ID 太短！
-	//                .replaceAll(StrUtil.upperFirst(ARTIFACT_ID), StrUtil.upperFirst(artifactIdNew))
-	//                .replaceAll(TITLE, titleNew);
+	//return copyDir(r.Path(), to, []string{}, ignores)
+
+	if err := filepath.Walk(r.Path(), walk(r.Path(), to)); err != nil {
+		return err
+	}
+	return nil
 }

@@ -5,7 +5,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"os"
@@ -42,10 +41,6 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
 	t, err := time.ParseDuration(timeout)
 	if err != nil {
 		panic(err)
@@ -66,43 +61,9 @@ func run(cmd *cobra.Command, args []string) {
 	} else {
 		name = args[0]
 	}
-	projectName, workingDir := processProjectParams(name, wd)
-	p := &Project{Name: projectName}
-	fmt.Println(projectName, workingDir)
 
-	p.New(ctx, workingDir, repoURL, branch)
-
-	//done := make(chan error, 1)
-	//go func() {
-	//	projectRoot := workingDir
-	//	packagePath, e := filepath.Rel(projectRoot, filepath.Join(workingDir, projectName))
-	//	if e != nil {
-	//		done <- fmt.Errorf("🚫 failed to get relative path: %v", err)
-	//		return
-	//	}
-	//	packagePath = strings.ReplaceAll(packagePath, "\\", "/")
-	//
-	//	mod, e := base.ModulePath(filepath.Join(projectRoot, "go.mod"))
-	//	if e != nil {
-	//		done <- fmt.Errorf("🚫 failed to parse `go.mod`: %v", e)
-	//		return
-	//	}
-	//	// Get the relative path for adding a project based on Go modules
-	//	p.Path = filepath.Join(strings.TrimPrefix(workingDir, projectRoot+"/"), p.Name)
-	//	done <- p.Add(ctx, workingDir, repoURL, branch, mod, packagePath)
-	//}()
-	//select {
-	//case <-ctx.Done():
-	//	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-	//		fmt.Fprint(os.Stderr, "\033[31mERROR: project creation timed out\033[m\n")
-	//		return
-	//	}
-	//	fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to create project(%s)\033[m\n", ctx.Err().Error())
-	//	//case err = <-done:
-	//	//	if err != nil {
-	//	//		fmt.Fprintf(os.Stderr, "\033[31mERROR: Failed to create project(%s)\033[m\n", err.Error())
-	//	//	}
-	//}
+	createFolder(name)
+	generate(ctx, name)
 }
 
 func processProjectParams(projectName string, workingDir string) (projectNameResult, workingDirResult string) {

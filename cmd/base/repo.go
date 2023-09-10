@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"strings"
 )
 
@@ -105,10 +104,5 @@ func (r *Repo) CopyTo(ctx context.Context, to string, ignores []string) error {
 	if err := r.Clone(ctx); err != nil {
 		return err
 	}
-	fmt.Println("CopyTo called" + r.Path() + "    " + to)
-	if err := filepath.Walk(r.Path(), walk(r.Path(), to)); err != nil {
-		fmt.Println(err)
-		return err
-	}
-	return nil
+	return copyDir(r.Path(), to, []string{}, ignores)
 }

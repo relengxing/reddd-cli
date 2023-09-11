@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -59,7 +60,7 @@ func (r *Repo) Path() string {
 	} else {
 		branch = "@" + r.branch
 	}
-	return path.Join(r.home, r.url[start+1:end]+branch)
+	return filepath.Join(r.home, r.url[start+1:end]+branch)
 }
 
 // Pull fetch the repository from remote url.

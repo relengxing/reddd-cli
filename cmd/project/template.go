@@ -43,6 +43,7 @@ func createFolder(project string) {
 
 func clone(ctx context.Context) (PackageInfo, *base.Repo) {
 	repo := base.NewRepo(repoURL, branch)
+	//fmt.Println("clone ", repo.Path())
 	repo.Clone(ctx)
 	packageInfo := filepath.Join(repo.Path(), "package-info.json")
 	byteValue, _ := os.ReadFile(packageInfo)
@@ -54,6 +55,7 @@ func clone(ctx context.Context) (PackageInfo, *base.Repo) {
 // 根据文件夹内的 Package-info 信息生成标准工程
 func generate(ctx context.Context, project string) error {
 	if _, err := os.Stat(project); os.IsNotExist(err) {
+		fmt.Println("文件夹不存在，请先创建文件夹")
 		return errors.New("文件夹不存在，请先创建文件夹")
 	}
 	packageTemplate := filepath.Join(project, "package-template.json")
@@ -62,14 +64,17 @@ func generate(ctx context.Context, project string) error {
 	_ = json.Unmarshal(byteValue, &packageInfoNew)
 	infoRepo, repo := clone(ctx)
 
-	if err := filepath.Walk(repo.Path(), walk(repo.Path(), project, infoRepo, packageInfoNew)); err != nil {
+	wd, _ := os.Getwd()
+	if err := filepath.Walk(repo.Path(), walk(repo.Path(), filepath.Join(wd, project), infoRepo, packageInfoNew)); err != nil {
 		fmt.Println(err)
 		return err
 	}
+	removeGitKeeper(filepath.Join(wd, project))
 	return nil
 }
 
 func walk(home string, to string, infoRepo, infoNew PackageInfo) func(path string, info os.FileInfo, err error) error {
+	//fmt.Println("home %s , to %s", home, to)
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -88,25 +93,30 @@ func walk(home string, to string, infoRepo, infoNew PackageInfo) func(path strin
 				// rewrite file
 				content = reWriteFileContent(content, infoRepo, infoNew)
 			}
+			relativePath, err := filepath.Rel(home, path)
+			if err != nil {
+				fmt.Println("获取相对路径时出错：", err)
+				return err
+			}
 			//return file.getPath().replace(projectBaseDir, projectBaseDirNew) // 新目录
 			//.replace(PACKAGE_NAME.replaceAll("\\.", Matcher.quoteReplacement(separator)),
 			//packageNameNew.replaceAll("\\.", Matcher.quoteReplacement(separator)))
 			//.replace(ARTIFACT_ID, artifactIdNew) //
 			//.replaceAll(StrUtil.upperFirst(ARTIFACT_ID), StrUtil.upperFirst(artifactIdNew));
-			newPath := strings.ReplaceAll(path, home, to)
-			newPath = strings.ReplaceAll(newPath, strings.ReplaceAll(infoRepo.PackageName, "\\.", string(filepath.Separator)), strings.ReplaceAll(infoNew.PackageName, "\\.", string(filepath.Separator)))
+
+			newPath := strings.ReplaceAll(relativePath, strings.ReplaceAll(infoRepo.PackageName, "\\.", string(filepath.Separator)), strings.ReplaceAll(infoNew.PackageName, "\\.", string(filepath.Separator)))
 			newPath = strings.ReplaceAll(newPath, infoRepo.ArtifactId, infoNew.ArtifactId)
 			ArtifactIdRepoUpper := strings.ToUpper(string(infoRepo.ArtifactId[0])) + infoRepo.ArtifactId[1:]
 			ArtifactIdNewUpper := strings.ToUpper(string(infoNew.ArtifactId[0])) + infoNew.ArtifactId[1:]
 			newPath = strings.ReplaceAll(newPath, ArtifactIdRepoUpper, ArtifactIdNewUpper)
+			newPath = filepath.Join(to, newPath)
 
-			//fmt.Println("newPath %s , path %s", path, newPath)
+			//fmt.Println("path %s , newPath %s", path, newPath)
 			err = writeFileTo(content, newPath, info)
 			if err != nil {
 				fmt.Println(err)
 				return err
 			}
-
 		}
 		return nil
 	}
@@ -137,5 +147,25 @@ func writeFileTo(content []byte, path string, srcinfo os.FileInfo) error {
 		fmt.Println(err)
 		return err
 	}
+	//fmt.Println("写文件" + path)
 	return os.WriteFile(path, content, srcinfo.Mode())
+}
+
+func removeGitKeeper(folderPath string) {
+	filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 检查文件是否是 .gitkeeper 文件
+		if !info.IsDir() && info.Name() == ".gitkeeper" {
+			//fmt.Println("删除 .gitkeeper 文件:", path)
+			err := os.Remove(path)
+			if err != nil {
+				fmt.Println("删除 .gitkeeper 文件时出错:", err)
+				return err
+			}
+		}
+		return nil
+	})
 }

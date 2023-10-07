@@ -80,7 +80,7 @@ func walk(home string, to string, infoRepo, infoNew PackageInfo) func(path strin
 			return err
 		}
 		if info.IsDir() && utils.ContainsString(infoRepo.Ignore, info.Name()) {
-			return filepath.SkipDir
+			return filepath.SkipAll
 		}
 
 		if !info.IsDir() { // 如果当前路径不是一个目录，则将其添加到文件路径数组中

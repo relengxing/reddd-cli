@@ -54,18 +54,22 @@ func clone(ctx context.Context) (PackageInfo, *base.Repo) {
 
 // 根据文件夹内的 Package-info 信息生成标准工程
 func generate(ctx context.Context, project string) error {
-	if _, err := os.Stat(project); os.IsNotExist(err) {
-		fmt.Println("文件夹不存在，请先创建文件夹")
-		return errors.New("文件夹不存在，请先创建文件夹")
-	}
+	//if _, err := os.Stat(project); os.IsNotExist(err) {
+	//	fmt.Println("文件夹不存在，请先创建文件夹")
+	//	return errors.New("文件夹不存在，请先创建文件夹")
+	//}
 	packageTemplate := filepath.Join(project, "package-template.json")
+	if _, err := os.Stat(packageTemplate); os.IsNotExist(err) {
+		fmt.Println("文件不存在，请先创建package-template.json")
+		return errors.New("文件不存在，请先创建package-template.json")
+	}
 	byteValue, _ := os.ReadFile(packageTemplate)
 	var packageInfoNew PackageInfo
 	_ = json.Unmarshal(byteValue, &packageInfoNew)
 	infoRepo, repo := clone(ctx)
 
 	wd, _ := os.Getwd()
-	if err := filepath.Walk(repo.Path(), walk(repo.Path(), filepath.Join(wd, project), infoRepo, packageInfoNew)); err != nil {
+	if err := filepath.Walk(repo.Path(), walk(repo.Path(), wd, infoRepo, packageInfoNew)); err != nil {
 		fmt.Println(err)
 		return err
 	}

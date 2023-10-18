@@ -5,7 +5,6 @@ package project
 
 import (
 	"context"
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -44,18 +43,20 @@ func generation(cmd *cobra.Command, args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), t)
 	ctx = ctx
 	defer cancel()
-	name := ""
-	if len(args) == 0 {
-		prompt := &survey.Input{
-			Message: "What is project name ?",
-			Help:    "Created project name.",
-		}
-		err = survey.AskOne(prompt, &name)
-		if err != nil || name == "" {
-			return
-		}
-	} else {
-		name = args[0]
-	}
-	generate(ctx, name)
+	//name := ""
+	//if len(args) == 0 {
+	//	prompt := &survey.Input{
+	//		Message: "What is project name ?",
+	//		Help:    "Created project name.",
+	//	}
+	//	err = survey.AskOne(prompt, &name)
+	//	if err != nil || name == "" {
+	//		return
+	//	}
+	//} else {
+	//	name = args[0]
+	//}
+	//generate(ctx, name)
+	generate(ctx, "./")
+
 }

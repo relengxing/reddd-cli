@@ -1,8 +1,6 @@
 package main
 
-import (
-	"reddd-cli/template"
-)
+import "reddd-cli/template"
 
 func main() {
 	//queryParam := column.QueryParam{
@@ -18,4 +16,5 @@ func main() {
 	//marshal, _ := json.Marshal(tableColumn)
 	//fmt.Println(string(marshal))
 	template.GenerateEntity()
+	//template.GenerateController()
 }

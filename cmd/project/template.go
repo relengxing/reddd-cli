@@ -34,7 +34,7 @@ func createFolder(project string) {
 	"groupId":"com.relengxing.base",
 	"artifactId":"demo",
 	"packageName":"com.relengxing.base.demo",
-	"title":"MyDemo"
+	"title":"MyDemo",
 	"database":{
 		"ip":"127.0.0.1",
 		"port":"3306",

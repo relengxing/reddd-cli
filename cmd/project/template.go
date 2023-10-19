@@ -31,10 +31,17 @@ func createFolder(project string) {
 	}
 	// 创建 package-info.json
 	content := `{
-	"groupId":"com.relengxing.demo",
+	"groupId":"com.relengxing.base",
 	"artifactId":"demo",
-	"packageName":"com.relengxing.demo",
+	"packageName":"com.relengxing.base.demo",
 	"title":"MyDemo"
+	"database":{
+		"ip":"127.0.0.1",
+		"port":"3306",
+		"username":"root",
+		"password":"123456",
+		"db":"test"
+	}
 }
 	`
 	packageTemplate := filepath.Join(project, "reddd-template.json")

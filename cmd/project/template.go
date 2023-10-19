@@ -84,13 +84,13 @@ func walk(home string, to string, infoRepo, infoNew PackageInfo) func(path strin
 			return err
 		}
 		if info.IsDir() && utils.ContainsString(infoRepo.Ignore, info.Name()) {
-			return filepath.SkipAll
+			return filepath.SkipDir
 		}
 
 		if !info.IsDir() { // 如果当前路径不是一个目录，则将其添加到文件路径数组中
 			content, err := os.ReadFile(path)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("readfile error", err)
 				return err
 			}
 			if !utils.ContainsString(infoRepo.WhiteList, filepath.Ext(path)) {
@@ -108,7 +108,11 @@ func walk(home string, to string, infoRepo, infoNew PackageInfo) func(path strin
 			//.replace(ARTIFACT_ID, artifactIdNew) //
 			//.replaceAll(StrUtil.upperFirst(ARTIFACT_ID), StrUtil.upperFirst(artifactIdNew));
 
-			newPath := strings.ReplaceAll(relativePath, strings.ReplaceAll(infoRepo.PackageName, "\\.", string(filepath.Separator)), strings.ReplaceAll(infoNew.PackageName, "\\.", string(filepath.Separator)))
+			repoPackageName := strings.ReplaceAll(infoRepo.PackageName, ".", string(filepath.Separator))
+			newRepoPackageName := strings.ReplaceAll(infoNew.PackageName, ".", string(filepath.Separator))
+			//fmt.Printf(" relativePath %s, repoPackageName %s  newRepoPackageName %s \r\n", relativePath, repoPackageName, newRepoPackageName)
+
+			newPath := strings.ReplaceAll(relativePath, repoPackageName, newRepoPackageName)
 			newPath = strings.ReplaceAll(newPath, infoRepo.ArtifactId, infoNew.ArtifactId)
 			ArtifactIdRepoUpper := strings.ToUpper(string(infoRepo.ArtifactId[0])) + infoRepo.ArtifactId[1:]
 			ArtifactIdNewUpper := strings.ToUpper(string(infoNew.ArtifactId[0])) + infoNew.ArtifactId[1:]
@@ -118,7 +122,7 @@ func walk(home string, to string, infoRepo, infoNew PackageInfo) func(path strin
 			//fmt.Println("path %s , newPath %s", path, newPath)
 			err = writeFileTo(content, newPath, info)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("writefile error", err)
 				return err
 			}
 		}
@@ -146,7 +150,8 @@ func reWriteFileContent(old []byte, infoRepo, infoNew PackageInfo) []byte {
 }
 
 func writeFileTo(content []byte, path string, srcinfo os.FileInfo) error {
-	err := os.MkdirAll(strings.Replace(path, srcinfo.Name(), "", -1), os.ModePerm)
+	newPath, _ := filepath.Split(path)
+	err := os.MkdirAll(newPath, os.ModePerm)
 	if err != nil {
 		fmt.Println(err)
 		return err
